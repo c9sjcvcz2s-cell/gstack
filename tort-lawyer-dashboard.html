@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plaintiff Litigation Dashboard</title>
+<style>
+:root {
+  --bg:        #f0f4fa;
+  --surface:   #ffffff;
+  --surface2:  #f7f9fd;
+  --border:    #dce4f0;
+  --border2:   #c8d5ea;
+  --text:      #0f1f3d;
+  --muted:     #6278a0;
+  --blue:      #1a56db;
+  --blue-lt:   #e8f0fe;
+  --blue-mid:  #3b82f6;
+  --navy:      #0e2a5a;
+  --red:       #dc2626;
+  --red-lt:    #fef2f2;
+  --amber:     #d97706;
+  --amber-lt:  #fffbeb;
+  --green:     #16a34a;
+  --green-lt:  #f0fdf4;
+  --purple:    #7c3aed;
+  --purple-lt: #f5f3ff;
+  --radius:    10px;
+  --shadow:    0 1px 4px rgba(15,31,61,0.08), 0 4px 16px rgba(15,31,61,0.04);
+  --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ── Layout ── */
+.app { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  background: var(--navy);
+  color: #c8d9f5;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  padding: 0;
+  width: 220px;
+}
+.sidebar-logo {
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  gap: 10px;
+  padding: 22px 20px 18px;
+}
+.sidebar-logo-icon {
+  background: var(--blue);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  height: 34px;
+  line-height: 34px;
+  text-align: center;
+  width: 34px;
+}
+.sidebar-logo-text { font-size: 0.85rem; font-weight: 700; color: #fff; line-height: 1.3; }
+.sidebar-logo-sub  { font-size: 0.7rem; color: #7a9ccc; }
+
+.sidebar-section { padding: 20px 12px 6px; }
+.sidebar-section-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #4d6fa0;
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+.nav-item {
+  align-items: center;
+  border-radius: 7px;
+  color: #94b8e8;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.82rem;
+  font-weight: 500;
+  gap: 10px;
+  padding: 8px 10px;
+  transition: background 0.12s, color 0.12s;
+  user-select: none;
+}
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #d6e8ff; }
+.nav-item.active { background: rgba(26,86,219,0.35); color: #fff; font-weight: 600; }
+.nav-item .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  background: var(--red);
+  border-radius: 99px;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-left: auto;
+  padding: 1px 6px;
+}
+
+.sidebar-footer {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: auto;
+  padding: 14px 20px;
+}
+.sidebar-user { display: flex; align-items: center; gap: 10px; }
+.sidebar-avatar {
+  background: var(--blue);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  width: 32px;
+  flex-shrink: 0;
+}
+.sidebar-user-name  { font-size: 0.8rem; font-weight: 600; color: #d6e8ff; }
+.sidebar-user-role  { font-size: 0.68rem; color: #4d6fa0; }
+
+/* ── Main ── */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+.topbar {
+  align-items: center;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 16px;
+  padding: 14px 28px;
+}
+.topbar-title { font-size: 1.15rem; font-weight: 700; color: var(--navy); flex: 1; }
+.topbar-date  { font-size: 0.78rem; color: var(--muted); }
+.topbar-btn {
+  align-items: center;
+  background: var(--blue);
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 600;
+  gap: 6px;
+  padding: 8px 16px;
+  transition: opacity 0.15s;
+}
+.topbar-btn:hover { opacity: 0.88; }
+
+.content { flex: 1; padding: 24px 28px; overflow-y: auto; }
+
+/* ── KPI row ── */
+.kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 22px; }
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.kpi-blue::before   { background: var(--blue); }
+.kpi-red::before    { background: var(--red); }
+.kpi-amber::before  { background: var(--amber); }
+.kpi-green::before  { background: var(--green); }
+.kpi-purple::before { background: var(--purple); }
+.kpi-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
+.kpi-num   { font-size: 1.8rem; font-weight: 800; color: var(--navy); line-height: 1; }
+.kpi-sub   { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+.kpi-icon  { position: absolute; top: 14px; right: 14px; font-size: 1.3rem; opacity: 0.15; }
+
+/* ── Grid ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.grid-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  padding: 14px 18px;
+}
+.card-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--navy);
+  flex: 1;
+}
+.card-action {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  transition: background 0.1s, color 0.1s;
+}
+.card-action:hover { background: var(--blue-lt); color: var(--blue); border-color: var(--blue); }
+.card-body { padding: 16px 18px; }
+
+/* ── Cases table ── */
+.cases-table { width: 100%; border-collapse: collapse; }
+.cases-table th {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  padding: 0 10px 10px;
+  text-align: left;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.cases-table td { padding: 11px 10px; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+.cases-table tr:last-child td { border-bottom: none; }
+.cases-table tr:hover td { background: var(--surface2); }
+.case-name { font-weight: 600; color: var(--navy); }
+.case-num  { font-size: 0.72rem; color: var(--muted); }
+.case-type { font-size: 0.72rem; }
+
+/* ── Stage badge ── */
+.badge {
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+.badge-blue   { background: var(--blue-lt);   color: var(--blue); }
+.badge-red    { background: var(--red-lt);    color: var(--red); }
+.badge-amber  { background: var(--amber-lt);  color: var(--amber); }
+.badge-green  { background: var(--green-lt);  color: var(--green); }
+.badge-purple { background: var(--purple-lt); color: var(--purple); }
+.badge-gray   { background: #f0f4fa; color: var(--muted); }
+
+/* ── SOL / Deadline tracker ── */
+.deadline-list { display: flex; flex-direction: column; gap: 0; }
+.deadline-item {
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  padding: 11px 18px;
+}
+.deadline-item:last-child { border-bottom: none; }
+.deadline-days {
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  min-width: 52px;
+  padding: 5px 8px;
+  text-align: center;
+}
+.days-critical { background: var(--red-lt);   color: var(--red); }
+.days-warn     { background: var(--amber-lt); color: var(--amber); }
+.days-ok       { background: var(--green-lt); color: var(--green); }
+.deadline-info { flex: 1; }
+.deadline-case { font-weight: 600; font-size: 0.82rem; color: var(--navy); }
+.deadline-desc { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+.deadline-date { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+
+/* ── Tasks ── */
+.task-add-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.task-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  outline: none;
+  padding: 7px 12px;
+  transition: border-color 0.15s;
+}
+.task-input:focus { border-color: var(--blue); }
+.task-input::placeholder { color: var(--muted); }
+.task-add-btn {
+  background: var(--blue);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 7px 14px;
+}
+.task-add-btn:hover { opacity: 0.88; }
+.task-list { display: flex; flex-direction: column; gap: 5px; }
+.task-item {
+  align-items: center;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  display: flex;
+  gap: 10px;
+  padding: 8px 10px;
+  transition: background 0.1s;
+}
+.task-item:hover { background: var(--blue-lt); border-color: #c5d8fc; }
+.task-cb {
+  border: 2px solid var(--border2);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  height: 16px;
+  width: 16px;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.task-cb:hover { border-color: var(--green); }
+.task-cb.checked { background: var(--green); border-color: var(--green); }
+.task-cb.checked::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 800; }
+.task-text { flex: 1; font-size: 0.82rem; }
+.task-item.done .task-text { color: var(--muted); text-decoration: line-through; }
+.task-del { color: var(--muted); cursor: pointer; font-size: 0.7rem; opacity: 0; padding: 2px 4px; border-radius: 4px; }
+.task-item:hover .task-del { opacity: 1; }
+.task-del:hover { background: var(--red-lt); color: var(--red); }
+.task-priority {
+  font-size: 0.62rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+.pri-high   { background: var(--red-lt);    color: var(--red); }
+.pri-med    { background: var(--amber-lt);  color: var(--amber); }
+.pri-low    { background: var(--green-lt);  color: var(--green); }
+.task-empty { color: var(--muted); font-size: 0.8rem; text-align: center; padding: 12px; }
+
+/* ── Notes ── */
+.notes-area {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  min-height: 110px;
+  outline: none;
+  padding: 10px 13px;
+  resize: vertical;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.notes-area:focus { border-color: var(--blue); }
+.notes-area::placeholder { color: var(--muted); }
+
+/* ── Settlement tracker ── */
+.settlement-list { display: flex; flex-direction: column; gap: 0; }
+.settlement-item {
+  border-bottom: 1px solid var(--border);
+  padding: 11px 18px;
+}
+.settlement-item:last-child { border-bottom: none; }
+.settlement-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.settlement-case { font-weight: 600; font-size: 0.82rem; color: var(--navy); flex: 1; }
+.settlement-pct  { font-size: 0.75rem; font-weight: 700; color: var(--blue); }
+.settlement-bar-wrap { background: var(--border); border-radius: 99px; height: 5px; overflow: hidden; }
+.settlement-bar { background: linear-gradient(90deg, var(--blue), var(--blue-mid)); height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+.settlement-amounts { display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.68rem; color: var(--muted); }
+
+/* ── Recent activity ── */
+.activity-list { display: flex; flex-direction: column; }
+.activity-item {
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  padding: 10px 18px;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 8px;
+  margin-top: 5px;
+  width: 8px;
+}
+.activity-body { flex: 1; }
+.activity-text { font-size: 0.8rem; line-height: 1.4; }
+.activity-text strong { color: var(--navy); }
+.activity-time { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+/* ── Add Case Modal ── */
+.modal-overlay {
+  background: rgba(10,20,50,0.45);
+  backdrop-filter: blur(2px);
+  bottom: 0; left: 0; right: 0; top: 0;
+  display: none;
+  position: fixed;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(10,20,50,0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  width: 520px;
+}
+.modal-title { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-input, .form-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  outline: none;
+  padding: 8px 12px;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.form-input:focus, .form-select:focus { border-color: var(--blue); }
+.form-input::placeholder { color: var(--muted); }
+.modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+.btn-cancel {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.82rem;
+  padding: 8px 18px;
+}
+.btn-cancel:hover { background: var(--surface2); }
+.btn-save {
+  background: var(--blue);
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 22px;
+}
+.btn-save:hover { opacity: 0.88; }
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 800px) {
+  .sidebar { display: none; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .content { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">⚖</div>
+    <div>
+      <div class="sidebar-logo-text">LitigationOS</div>
+      <div class="sidebar-logo-sub">Plaintiff Practice</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Workspace</div>
+    <div class="nav-item active"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item"><span class="nav-icon">📁</span> All Cases <span class="nav-badge" id="nav-cases-count">0</span></div>
+    <div class="nav-item"><span class="nav-icon">👥</span> Clients</div>
+    <div class="nav-item"><span class="nav-icon">📅</span> Calendar</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Case Work</div>
+    <div class="nav-item"><span class="nav-icon">⏱</span> Deadlines <span class="nav-badge" id="nav-deadline-count">0</span></div>
+    <div class="nav-item"><span class="nav-icon">💰</span> Settlements</div>
+    <div class="nav-item"><span class="nav-icon">📄</span> Pleadings</div>
+    <div class="nav-item"><span class="nav-icon">🔍</span> Discovery</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Finance</div>
+    <div class="nav-item"><span class="nav-icon">💵</span> Contingency Fees</div>
+    <div class="nav-item"><span class="nav-icon">🧾</span> Expenses</div>
+    <div class="nav-item"><span class="nav-icon">📈</span> Reports</div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebar-initials">--</div>
+      <div>
+        <div class="sidebar-user-name" id="sidebar-name">Loading…</div>
+        <div class="sidebar-user-role">Plaintiff Attorney</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main content -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Case Dashboard</div>
+    <div class="topbar-date" id="topbar-date"></div>
+    <button class="topbar-btn" onclick="openModal()">＋ New Case</button>
+  </div>
+
+  <div class="content">
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-label">Active Cases</div>
+        <div class="kpi-num" id="kpi-active">0</div>
+        <div class="kpi-sub">currently in litigation</div>
+        <div class="kpi-icon">📁</div>
+      </div>
+      <div class="kpi-card kpi-red">
+        <div class="kpi-label">Critical Deadlines</div>
+        <div class="kpi-num" id="kpi-critical">0</div>
+        <div class="kpi-sub">within 30 days</div>
+        <div class="kpi-icon">⚠️</div>
+      </div>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-label">Pending Settlement</div>
+        <div class="kpi-num" id="kpi-settlement">$0</div>
+        <div class="kpi-sub">total demand value</div>
+        <div class="kpi-icon">💬</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-label">Resolved YTD</div>
+        <div class="kpi-num" id="kpi-resolved">0</div>
+        <div class="kpi-sub">cases closed this year</div>
+        <div class="kpi-icon">✅</div>
+      </div>
+      <div class="kpi-card kpi-purple">
+        <div class="kpi-label">Avg. Recovery</div>
+        <div class="kpi-num" id="kpi-recovery">$0</div>
+        <div class="kpi-sub">per resolved case</div>
+        <div class="kpi-icon">📈</div>
+      </div>
+    </div>
+
+    <!-- Cases + Deadlines -->
+    <div class="grid-3">
+
+      <!-- Active cases -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Active Cases</div>
+          <button class="card-action" onclick="openModal()">+ Add Case</button>
+        </div>
+        <table class="cases-table">
+          <thead>
+            <tr>
+              <th>Client / Case</th>
+              <th>Type</th>
+              <th>Stage</th>
+              <th>Demand</th>
+              <th>SOL</th>
+            </tr>
+          </thead>
+          <tbody id="cases-tbody">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px 10px;font-size:0.8rem;">No cases yet — click + Add Case</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Deadlines -->
+      <div class="card" style="grid-column: span 2;">
+        <div class="card-header">
+          <div class="card-title">⚠ Upcoming Deadlines &amp; SOL</div>
+        </div>
+        <div class="deadline-list" id="deadline-list">
+          <div style="padding:20px 18px;color:var(--muted);font-size:0.8rem;text-align:center;">No deadlines — add cases to track SOL</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Settlement + Activity + Tasks -->
+    <div class="grid-3">
+
+      <!-- Settlement tracker -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Settlement Progress</div>
+        </div>
+        <div class="settlement-list" id="settlement-list">
+          <div style="padding:20px 18px;color:var(--muted);font-size:0.8rem;text-align:center;">No active negotiations</div>
+        </div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Action Items</div>
+        </div>
+        <div class="card-body">
+          <div class="task-add-row">
+            <input class="task-input" id="task-input" placeholder="Add task…" />
+            <select id="task-priority" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:0.75rem;padding:0 6px;outline:none;">
+              <option value="high">🔴 High</option>
+              <option value="med" selected>🟡 Med</option>
+              <option value="low">🟢 Low</option>
+            </select>
+            <button class="task-add-btn" onclick="addTask()">+</button>
+          </div>
+          <div class="task-list" id="task-list"></div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Notes &amp; Memos</div>
+        </div>
+        <div class="card-body">
+          <textarea class="notes-area" id="notes" placeholder="Case notes, strategy memos, client reminders…"></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent Activity</div>
+      </div>
+      <div class="activity-list" id="activity-list">
+        <div class="activity-item">
+          <div class="activity-dot" style="background:var(--blue)"></div>
+          <div class="activity-body">
+            <div class="activity-text">Dashboard initialized. Add your first case to get started.</div>
+            <div class="activity-time">Just now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Add Case Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">New Case</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Client Name</label>
+        <input class="form-input" id="f-client" placeholder="e.g. Jane Smith" />
+      </div>
+      <div class="form-group">
+        <label>Case Number / File #</label>
+        <input class="form-input" id="f-casenum" placeholder="e.g. 2024-CV-0042" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tort Type</label>
+        <select class="form-select" id="f-type">
+          <option>Auto Accident</option>
+          <option>Slip &amp; Fall</option>
+          <option>Medical Malpractice</option>
+          <option>Product Liability</option>
+          <option>Wrongful Death</option>
+          <option>Workplace Injury</option>
+          <option>Dog Bite</option>
+          <option>Premises Liability</option>
+          <option>Trucking Accident</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Litigation Stage</label>
+        <select class="form-select" id="f-stage">
+          <option>Intake</option>
+          <option>Investigation</option>
+          <option>Demand Sent</option>
+          <option>Negotiation</option>
+          <option>Suit Filed</option>
+          <option>Discovery</option>
+          <option>Mediation</option>
+          <option>Trial Prep</option>
+          <option>Trial</option>
+          <option>Post-Trial</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Incident Date</label>
+        <input class="form-input" id="f-incident" type="date" />
+      </div>
+      <div class="form-group">
+        <label>SOL Deadline</label>
+        <input class="form-input" id="f-sol" type="date" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Demand Amount ($)</label>
+        <input class="form-input" id="f-demand" type="number" placeholder="e.g. 250000" />
+      </div>
+      <div class="form-group">
+        <label>Offer Received ($)</label>
+        <input class="form-input" id="f-offer" type="number" placeholder="e.g. 75000" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group full">
+        <label>Defendant / Insurance Co.</label>
+        <input class="form-input" id="f-defendant" placeholder="e.g. Allstate / ABC Corp" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveCase()">Save Case</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Persistence ──────────────────────────────────────────────────────────
+let state = (() => {
+  try {
+    const s = JSON.parse(localStorage.getItem('tort-dash') || 'null');
+    if (s && s.cases) return s;
+  } catch(e) {}
+  return { cases: [], tasks: [], notes: '', activity: [], attorney: 'Attorney', resolvedYTD: 0, avgRecovery: 0 };
+})();
+
+function save() { localStorage.setItem('tort-dash', JSON.stringify(state)); }
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmt$(n) {
+  if (!n) return '$0';
+  const v = Number(n);
+  if (v >= 1000000) return '$' + (v/1000000).toFixed(1).replace(/\.0$/,'') + 'M';
+  if (v >= 1000)    return '$' + (v/1000).toFixed(0) + 'K';
+  return '$' + v.toLocaleString();
+}
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  d.setHours(0,0,0,0);
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.round((d - now) / 86400000);
+}
+function fmtDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+function logActivity(text, color) {
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  state.activity.unshift({ text, color: color || '#1a56db', time: 'Today ' + time });
+  if (state.activity.length > 20) state.activity.pop();
+}
+
+const STAGE_BADGE = {
+  'Intake':        'badge-gray',
+  'Investigation': 'badge-blue',
+  'Demand Sent':   'badge-purple',
+  'Negotiation':   'badge-amber',
+  'Suit Filed':    'badge-red',
+  'Discovery':     'badge-blue',
+  'Mediation':     'badge-amber',
+  'Trial Prep':    'badge-red',
+  'Trial':         'badge-red',
+  'Post-Trial':    'badge-green',
+};
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+function openModal()  { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+
+function saveCase() {
+  const client   = document.getElementById('f-client').value.trim();
+  const casenum  = document.getElementById('f-casenum').value.trim();
+  const type     = document.getElementById('f-type').value;
+  const stage    = document.getElementById('f-stage').value;
+  const incident = document.getElementById('f-incident').value;
+  const sol      = document.getElementById('f-sol').value;
+  const demand   = parseFloat(document.getElementById('f-demand').value) || 0;
+  const offer    = parseFloat(document.getElementById('f-offer').value) || 0;
+  const defendant= document.getElementById('f-defendant').value.trim();
+
+  if (!client) { alert('Client name is required.'); return; }
+
+  const c = { id: Date.now(), client, casenum, type, stage, incident, sol, demand, offer, defendant };
+  state.cases.unshift(c);
+  logActivity(`New case added: <strong>${esc(client)}</strong> — ${esc(type)}`, '#1a56db');
+  save();
+  render();
+  closeModal();
+
+  // clear form
+  ['f-client','f-casenum','f-incident','f-sol','f-demand','f-offer','f-defendant'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+// ── Render Cases ──────────────────────────────────────────────────────────
+function renderCases() {
+  const tbody = document.getElementById('cases-tbody');
+  if (state.cases.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px 10px;font-size:0.8rem;">No cases yet — click + Add Case</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.cases.map(c => {
+    const days = daysUntil(c.sol);
+    const solLabel = days === null ? '—' : days < 0 ? '<span style="color:var(--red);font-weight:700;">EXPIRED</span>' :
+      `<span style="color:${days <= 30 ? 'var(--red)' : days <= 90 ? 'var(--amber)' : 'var(--green)'};font-weight:600;">${days}d</span>`;
+    const badge = STAGE_BADGE[c.stage] || 'badge-gray';
+    return `<tr>
+      <td><div class="case-name">${esc(c.client)}</div><div class="case-num">${esc(c.casenum || '—')}</div></td>
+      <td><span class="case-type" style="color:var(--muted)">${esc(c.type)}</span></td>
+      <td><span class="badge ${badge}">${esc(c.stage)}</span></td>
+      <td style="font-weight:600;color:var(--navy)">${fmt$(c.demand)}</td>
+      <td>${solLabel}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Render Deadlines ──────────────────────────────────────────────────────
+function renderDeadlines() {
+  const list = document.getElementById('deadline-list');
+  const items = state.cases
+    .filter(c => c.sol)
+    .map(c => ({ ...c, days: daysUntil(c.sol) }))
+    .sort((a, b) => a.days - b.days)
+    .slice(0, 8);
+
+  if (items.length === 0) {
+    list.innerHTML = '<div style="padding:20px 18px;color:var(--muted);font-size:0.8rem;text-align:center;">No SOL dates on file</div>';
+    return;
+  }
+  list.innerHTML = items.map(c => {
+    const cls = c.days < 0 ? 'days-critical' : c.days <= 30 ? 'days-critical' : c.days <= 90 ? 'days-warn' : 'days-ok';
+    const label = c.days < 0 ? 'EXPIRED' : c.days === 0 ? 'TODAY' : c.days + 'd';
+    return `<div class="deadline-item">
+      <div class="deadline-days ${cls}">${label}</div>
+      <div class="deadline-info">
+        <div class="deadline-case">${esc(c.client)}</div>
+        <div class="deadline-desc">${esc(c.type)} · ${esc(c.stage)}</div>
+      </div>
+      <div class="deadline-date">${fmtDate(c.sol)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Render Settlements ────────────────────────────────────────────────────
+function renderSettlements() {
+  const list = document.getElementById('settlement-list');
+  const items = state.cases.filter(c => c.demand > 0 && ['Demand Sent','Negotiation','Mediation'].includes(c.stage));
+
+  if (items.length === 0) {
+    list.innerHTML = '<div style="padding:20px 18px;color:var(--muted);font-size:0.8rem;text-align:center;">No active negotiations</div>';
+    return;
+  }
+  list.innerHTML = items.map(c => {
+    const pct = c.offer > 0 ? Math.min(100, Math.round(c.offer / c.demand * 100)) : 0;
+    return `<div class="settlement-item">
+      <div class="settlement-row">
+        <div class="settlement-case">${esc(c.client)}</div>
+        <div class="settlement-pct">${pct}%</div>
+      </div>
+      <div class="settlement-bar-wrap"><div class="settlement-bar" style="width:${pct}%"></div></div>
+      <div class="settlement-amounts">
+        <span>Offer: <strong>${fmt$(c.offer || 0)}</strong></span>
+        <span>Demand: <strong>${fmt$(c.demand)}</strong></span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────
+function renderKPIs() {
+  const active   = state.cases.length;
+  const critical = state.cases.filter(c => { const d = daysUntil(c.sol); return d !== null && d >= 0 && d <= 30; }).length;
+  const pendingVal = state.cases
+    .filter(c => ['Demand Sent','Negotiation','Mediation'].includes(c.stage))
+    .reduce((s, c) => s + (c.demand || 0), 0);
+
+  document.getElementById('kpi-active').textContent    = active;
+  document.getElementById('kpi-critical').textContent  = critical;
+  document.getElementById('kpi-settlement').textContent = fmt$(pendingVal);
+  document.getElementById('kpi-resolved').textContent  = state.resolvedYTD || 0;
+  document.getElementById('kpi-recovery').textContent  = fmt$(state.avgRecovery || 0);
+  document.getElementById('nav-cases-count').textContent   = active;
+  document.getElementById('nav-deadline-count').textContent = critical;
+}
+
+// ── Tasks ──────────────────────────────────────────────────────────────────
+function addTask() {
+  const inp = document.getElementById('task-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  const priority = document.getElementById('task-priority').value;
+  state.tasks.unshift({ id: Date.now(), text, priority, done: false });
+  inp.value = '';
+  save();
+  renderTasks();
+  inp.focus();
+}
+
+function toggleTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (t) { t.done = !t.done; save(); renderTasks(); }
+}
+
+function deleteTask(id) {
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  save();
+  renderTasks();
+}
+
+const PRI_LABEL = { high: '🔴 High', med: '🟡 Med', low: '🟢 Low' };
+const PRI_CLASS = { high: 'pri-high', med: 'pri-med', low: 'pri-low' };
+
+function renderTasks() {
+  const list = document.getElementById('task-list');
+  if (state.tasks.length === 0) {
+    list.innerHTML = '<div class="task-empty">No action items</div>';
+    return;
+  }
+  const sorted = [...state.tasks].sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const order = { high: 0, med: 1, low: 2 };
+    return (order[a.priority] || 1) - (order[b.priority] || 1);
+  });
+  list.innerHTML = sorted.map(t => `
+    <div class="task-item${t.done ? ' done' : ''}">
+      <div class="task-cb${t.done ? ' checked' : ''}" onclick="toggleTask(${t.id})"></div>
+      <span class="task-text">${esc(t.text)}</span>
+      <span class="task-priority ${PRI_CLASS[t.priority] || 'pri-med'}">${PRI_LABEL[t.priority] || '🟡 Med'}</span>
+      <span class="task-del" onclick="deleteTask(${t.id})">✕</span>
+    </div>`).join('');
+}
+
+document.getElementById('task-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+});
+
+// ── Notes ──────────────────────────────────────────────────────────────────
+const notesEl = document.getElementById('notes');
+notesEl.value = state.notes || '';
+notesEl.addEventListener('input', () => { state.notes = notesEl.value; save(); });
+
+// ── Activity ──────────────────────────────────────────────────────────────
+function renderActivity() {
+  const list = document.getElementById('activity-list');
+  if (!state.activity || state.activity.length === 0) {
+    list.innerHTML = '<div class="activity-item"><div class="activity-dot" style="background:var(--blue)"></div><div class="activity-body"><div class="activity-text">Dashboard initialized. Add your first case to get started.</div><div class="activity-time">Just now</div></div></div>';
+    return;
+  }
+  list.innerHTML = state.activity.slice(0, 10).map(a => `
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${a.color || '#1a56db'}"></div>
+      <div class="activity-body">
+        <div class="activity-text">${a.text}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Attorney name in sidebar ───────────────────────────────────────────────
+function setupAttorney() {
+  const name = state.attorney || 'Attorney';
+  const parts = name.trim().split(' ');
+  const initials = parts.map(p => p[0] || '').join('').slice(0,2).toUpperCase();
+  document.getElementById('sidebar-name').textContent = name;
+  document.getElementById('sidebar-initials').textContent = initials || 'AT';
+}
+
+// ── Date ──────────────────────────────────────────────────────────────────
+document.getElementById('topbar-date').textContent =
+  new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+
+// ── Render all ────────────────────────────────────────────────────────────
+function render() {
+  renderKPIs();
+  renderCases();
+  renderDeadlines();
+  renderSettlements();
+  renderTasks();
+  renderActivity();
+  setupAttorney();
+}
+
+render();
+</script>
+</body>
+</html>
