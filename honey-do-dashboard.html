@@ -82,6 +82,35 @@
   .dot-notes  { background: var(--accent); }
   .dot-cal    { background: #c084fc; }
 
+  /* Rating buttons */
+  .rating-btns {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .rating-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 3px 7px;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    opacity: 0;
+  }
+  .task-item:hover .rating-btn { opacity: 1; }
+  .rating-btn:hover { transform: scale(1.15); }
+  .rating-btn.active { opacity: 1; border-color: transparent; }
+  .rating-btn.active-up   { background: #1a3a26; border-color: var(--done); }
+  .rating-btn.active-neutral { background: #2a2010; border-color: var(--week); }
+  .rating-btn.active-down { background: #2a1420; border-color: var(--urgent); }
+  .rating-badge {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
   /* Add task input */
   .add-row {
     display: flex;
@@ -516,6 +545,16 @@ function renderBucket(bucket) {
   }).join('');
 }
 
+const RATING_ICON = { up: '👍', neutral: '😐', down: '👎' };
+
+function rateTask(id, rating) {
+  const task = state.tasks.done.find(t => t.id === id);
+  if (!task) return;
+  task.rating = task.rating === rating ? null : rating;
+  save();
+  renderDone();
+}
+
 function renderDone() {
   const list = document.getElementById('list-done');
   const tasks = state.tasks.done;
@@ -523,13 +562,23 @@ function renderDone() {
     list.innerHTML = '<div class="empty">No completed tasks yet</div>';
     return;
   }
-  list.innerHTML = tasks.map(t => `
+  list.innerHTML = tasks.map(t => {
+    const r = t.rating || null;
+    const badge = r ? `<span class="rating-badge" title="Rated: ${r}">${RATING_ICON[r]}</span>` : '';
+    return `
     <div class="task-item done" id="task-${t.id}">
       <div class="task-cb checked"></div>
       <span class="task-text">${esc(t.text)}</span>
+      ${badge}
+      <div class="rating-btns">
+        <button class="rating-btn${r === 'up'      ? ' active active-up'      : ''}" title="Went well"    onclick="rateTask(${t.id},'up')">👍</button>
+        <button class="rating-btn${r === 'neutral'  ? ' active active-neutral' : ''}" title="It was okay"  onclick="rateTask(${t.id},'neutral')">😐</button>
+        <button class="rating-btn${r === 'down'    ? ' active active-down'    : ''}" title="Was a pain"   onclick="rateTask(${t.id},'down')">👎</button>
+      </div>
       <span class="task-move" onclick="undoneTask(${t.id})">↩ Reopen</span>
       <span class="task-delete" onclick="deleteTask('done',${t.id})">✕</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderStats() {
